@@ -1,5 +1,6 @@
 package hu.rushhour.io;
 
+import hu.rushhour.config.GameSettings;
 import hu.rushhour.model.Board;
 import hu.rushhour.model.Vehicle;
 import java.io.IOException;
@@ -23,7 +24,7 @@ public final class BoardIo {
    * @return the default board
    */
   public static Board defaults() {
-    Board b = new Board(6, 12);
+    Board b = new Board(GameSettings.DEFAULT_ROWS, GameSettings.DEFAULT_COLUMNS);
     b.add(new Vehicle('A', 2, 1, 2, true));
     b.add(new Vehicle('B', 4, 8, 2, true));
     b.add(new Vehicle('C', 0, 3, 3, false));
@@ -50,7 +51,7 @@ public final class BoardIo {
       throw new IOException("Empty board file");
     }
     try {
-      String[] h = lines.get(0).split("\\s+");
+      String[] h = lines.getFirst().split("\\s+");
       if (h.length != 2) {
         throw new IllegalArgumentException("Header must have 2 numbers");
       }

@@ -114,10 +114,12 @@ public final class Board {
    */
   public boolean canMove(char id, int delta) {
     Vehicle v = get(id);
-    if (v == null || delta == 0) {
+    // A long tipus megakadalyozza az Integer.MIN_VALUE tulcsordulasat.
+    long distance = Math.abs((long) delta);
+    if (v == null || delta == 0 || distance > Math.max(rows, cols)) {
       return false;
     }
-    for (int n = 1; n <= Math.abs(delta); n++) {
+    for (int n = 1; n <= distance; n++) {
       int step = Integer.signum(delta) * n;
       int newRow = v.row() + (v.horizontal() ? 0 : step);
       int newCol = v.col() + (v.horizontal() ? step : 0);

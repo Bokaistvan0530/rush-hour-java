@@ -3,6 +3,7 @@ package hu.rushhour.app;
 import hu.rushhour.db.ScoreRepository;
 import hu.rushhour.game.Game;
 import hu.rushhour.io.BoardIo;
+import hu.rushhour.io.DefaultBoardLoader;
 import hu.rushhour.model.Board;
 import java.nio.file.Path;
 import java.util.Random;
@@ -20,13 +21,14 @@ public final class Main {
    * @param args parancssori argumentumok
    */
   public static void main(String[] args) {
-    Board board = BoardIo.defaults();
-    if (args.length > 0) {
-      try {
-        board = BoardIo.load(Path.of(args[0]));
-      } catch (Exception e) {
-        System.out.println("Using default board: " + e.getMessage());
-      }
+    Board board;
+    try {
+      Path path = args.length > 0 ? Path.of(args[0]) : null;
+      board = new DefaultBoardLoader().loadOrDefault(path);
+    } catch (Exception e) {
+      // Hibás elérési út esetén is a beépített pálya indul.
+      System.out.println("Using default board: " + e.getMessage());
+      board = BoardIo.defaults();
     }
     ScoreRepository scores = new ScoreRepository("./rushhour-scores");
     Game game = new Game(board, new Scanner(System.in), new Random(), scores);

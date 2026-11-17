@@ -18,7 +18,9 @@ public final class DefaultBoardLoader {
     }
     try {
       return BoardIo.load(file);
-    } catch (Exception ignored) {
+    } catch (Exception e) {
+      // A konzolon eddig is megjelent a fájlbetöltés sikertelensége.
+      System.out.println("Using default board: " + e.getMessage());
       return BoardIo.defaults();
     }
   }

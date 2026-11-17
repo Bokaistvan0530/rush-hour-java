@@ -1,11 +1,13 @@
 package hu.rushhour.game;
 
+import hu.rushhour.config.GameSettings;
 import hu.rushhour.db.ScoreRepository;
 import hu.rushhour.event.GameEvent;
 import hu.rushhour.event.GameEventBus;
 import hu.rushhour.io.BoardIo;
 import hu.rushhour.io.XmlSave;
 import hu.rushhour.model.Board;
+import hu.rushhour.service.BoardPrinter;
 import hu.rushhour.service.MoveValidator;
 import hu.rushhour.ui.ConsoleMenu;
 import java.nio.file.Path;
@@ -20,6 +22,7 @@ import java.util.Scanner;
 */
 public final class Game {
   private final ConsoleMenu menu = new ConsoleMenu();
+  private final BoardPrinter printer = new BoardPrinter();
   private final MoveValidator validator = new MoveValidator();
   private final GameEventBus events = new GameEventBus();
   private Board board;
@@ -27,7 +30,7 @@ public final class Game {
   private final ComputerPlayer ai;
   private final ScoreRepository scores;
   private String player = "Player";
-  private boolean humanTurn = true;
+  private Turn turn = Turn.HUMAN;
 
   /**
   * Creates the game controller.
@@ -60,12 +63,12 @@ public final class Game {
     }
     System.out.println("Commands: " + menu.help());
     while (true) {
-      System.out.println(board.render());
-      if (!humanTurn) {
+      System.out.println(printer.print(board));
+      if (turn == Turn.COMPUTER) {
         if (computerTurn()) {
           return;
         }
-        humanTurn = true;
+        turn = Turn.HUMAN;
         continue;
       }
       System.out.print(player + "> ");
@@ -95,38 +98,38 @@ public final class Game {
           case "load" -> {
             require(p, 2);
             board = BoardIo.load(Path.of(p[1]));
-            humanTurn = true;
+            turn = Turn.HUMAN;
             System.out.println("Board loaded.");
           }
           case "savexml" -> {
             require(p, 2);
-            XmlSave.save(Path.of(p[1]), new XmlSave.Snapshot(board, humanTurn, player));
+            XmlSave.save(Path.of(p[1]), new XmlSave.Snapshot(board, turn == Turn.HUMAN, player));
             System.out.println("Game saved.");
           }
           case "loadxml" -> {
             require(p, 2);
             XmlSave.Snapshot s = XmlSave.load(Path.of(p[1]));
             board = s.board();
-            humanTurn = s.humanTurn();
+            turn = s.humanTurn() ? Turn.HUMAN : Turn.COMPUTER;
             player = s.player();
             System.out.println("Game resumed.");
           }
           case "move" -> {
             require(p, 3);
-            char id = p[1].toUpperCase(Locale.ROOT).charAt(0);
+            char id = vehicleId(p[1]);
             int distance = Integer.parseInt(p[2]);
             validator.validate(board, id, distance);
             board.move(id, distance);
             events.publish(new GameEvent("move", id + " " + distance));
-            humanTurn = false;
+            turn = Turn.COMPUTER;
           }
           case "exit" -> {
             require(p, 2);
-            if (Character.toUpperCase(p[1].charAt(0)) != 'A' || !board.exit('A')) {
+            if (vehicleId(p[1]) != GameSettings.HUMAN_CAR
+                || !board.exit(GameSettings.HUMAN_CAR)) {
               throw new IllegalArgumentException("A must reach the right edge first");
             }
-            System.out.println("You win!");
-            recordWin(player);
+            finish(GameResult.HUMAN_WIN);
             return;
           }
           default -> System.out.println("Unknown command. Type help.");
@@ -138,15 +141,14 @@ public final class Game {
   }
 
   private boolean computerTurn() {
-    if (board.canExit('B')) {
-      board.exit('B');
-      System.out.println("Computer wins!");
-      recordWin("Computer");
+    if (board.canExit(GameSettings.COMPUTER_CAR)) {
+      board.exit(GameSettings.COMPUTER_CAR);
+      finish(GameResult.COMPUTER_WIN);
       return true;
     }
     Optional<Board.Move> choice = ai.choose(board);
     if (choice.isEmpty()) {
-      System.out.println("No legal moves: draw.");
+      finish(GameResult.DRAW);
       return true;
     }
     Board.Move m = choice.get();
@@ -155,12 +157,33 @@ public final class Game {
     return false;
   }
 
+  private void finish(GameResult result) {
+    switch (result) {
+      case HUMAN_WIN -> {
+        System.out.println("You win!");
+        recordWin(player);
+      }
+      case COMPUTER_WIN -> {
+        System.out.println("Computer wins!");
+        recordWin("Computer");
+      }
+      case DRAW -> System.out.println("No legal moves: draw.");
+    }
+  }
+
   private void recordWin(String name) {
     try {
       scores.win(name);
     } catch (SQLException e) {
       System.out.println("Could not save score: " + e.getMessage());
     }
+  }
+
+  private static char vehicleId(String text) {
+    if (text.length() != 1 || !Character.isLetterOrDigit(text.charAt(0))) {
+      throw new IllegalArgumentException("Vehicle id must be one character");
+    }
+    return Character.toUpperCase(text.charAt(0));
   }
 
   private static void require(String[] p, int n) {
