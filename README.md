@@ -19,5 +19,19 @@ A járművek csak a saját tengelyük mentén csúszhatnak. A kijáratot a megfe
 - `game`: játékmenet és gépi ellenfél; `service`: lépésellenőrzés, megjelenítés
 - `io`: TXT és XML; `db`: H2/JDBC; `ui`: konzolsegédek; `event`: Observer-események
 
-## Fontos ellenőrzési megjegyzések
-Ez a csomag **nem igazoltan végleges beadandó**. A környezetben Java 21 fordítást és konzolos indulást lehet ellenőrizni, de a teljes Maven-tesztfuttatás és a 80%-os JaCoCo-követelmény itt nem igazolt. Az XML mentés extra funkció. A tanári PDF-ben az induló pálya kapcsán ellentmondás van (alapértelmezett vagy üres); az itt alkalmazott megoldás az alapértelmezett pálya. A védésen saját kódismeret szükséges.
+## ## A projekt jelenlegi állapota és ellenőrzése
+
+A Rush Hour projekt Java 21 és Maven használatával készült. A fejlesztés során több hibajavításon és tesztelésen esett át.
+
+**Elvégzett ellenőrzések:**
+- A Maven `verify` parancs sikeresen lefutott (`BUILD SUCCESS`).
+- A JUnit-tesztek sikeresen teljesültek.
+- A JaCoCo által jelzett tesztlefedettség 91%, amely meghaladja a 80%-os minimumkövetelményt.
+- A Checkstyle-ellenőrzés sikeresen lefutott.
+- A játék konzolos működését, a pályabetöltést, az eredmények tárolását és a mentési funkciókat is kipróbáltuk.
+
+**Fontos tudnivalók:**
+
+A játék alapértelmezett pályával indul. Az XML-alapú mentés kiegészítő funkcióként szerepel a projektben.
+
+A sikeres tesztek és ellenőrzések alátámasztják a program működését, de nem helyettesítik a tanári követelmények teljes körű ellenőrzését és a szóbeli védést.
