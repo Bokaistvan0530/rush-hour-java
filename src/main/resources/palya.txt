@@ -1,0 +1,8 @@
+# ROWS COLS; ID ROW COL LENGTH H/V
+6 12
+A 2 1 2 H
+B 4 8 2 H
+C 0 3 3 V
+D 1 5 2 V
+E 3 6 2 H
+F 0 9 3 V
