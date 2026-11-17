@@ -19,7 +19,7 @@ A járművek csak a saját tengelyük mentén csúszhatnak. A kijáratot a megfe
 - `game`: játékmenet és gépi ellenfél; `service`: lépésellenőrzés, megjelenítés
 - `io`: TXT és XML; `db`: H2/JDBC; `ui`: konzolsegédek; `event`: Observer-események
 
-## ## A projekt jelenlegi állapota és ellenőrzése
+## A projekt jelenlegi állapota és ellenőrzése
 
 A Rush Hour projekt Java 21 és Maven használatával készült. A fejlesztés során több hibajavításon és tesztelésen esett át.
 
